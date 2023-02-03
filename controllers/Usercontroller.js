@@ -1,3 +1,4 @@
+import e from "express";
 import { User } from "../models/users.js";
 import { sendToken } from "../utility/sendtoken.js";
 import { sendMail } from "../utility/senMail.js";
@@ -26,6 +27,8 @@ export const register = async (req, resp) => {
   }
 };
 
+////////------------------------------------------------------/////////
+
 export const verify = async (req, resp) => {
   try {
     const otp = Number(req.body.otp); //wiill take input as otp
@@ -48,6 +51,8 @@ export const verify = async (req, resp) => {
   }
 };
 
+////////------------------------------------------------------/////////
+
 export const Login = async (req, resp) => {
   const { email, password } = req.body;
   try {
@@ -62,7 +67,7 @@ export const Login = async (req, resp) => {
         resp
           .status(400)
           .json({ success: false, message: "Invalid email or password" });
-      }else{
+      } else {
         sendToken(resp, user, 200, "Login successfull");
       }
     }
@@ -70,6 +75,8 @@ export const Login = async (req, resp) => {
     resp.status(500).json({ success: false, message: error.message });
   }
 };
+
+////////------------------------------------------------------/////////
 
 export const Logout = async (req, resp) => {
   const { email, password } = req.body;
@@ -82,6 +89,8 @@ export const Logout = async (req, resp) => {
     resp.status(500).json({ success: false, message: error.message });
   }
 };
+
+////////------------------------------------------------------/////////
 
 export const addtask = async (req, resp) => {
   try {
@@ -105,6 +114,8 @@ export const addtask = async (req, resp) => {
   }
 };
 
+////////------------------------------------------------------/////////
+
 export const removetask = async (req, resp) => {
   try {
     const { taskId } = req.params;
@@ -123,6 +134,8 @@ export const removetask = async (req, resp) => {
   }
 };
 
+////////------------------------------------------------------/////////
+
 export const updatetask = async (req, resp) => {
   try {
     const { taskId } = req.params;
@@ -138,6 +151,69 @@ export const updatetask = async (req, resp) => {
     resp
       .status(200)
       .json({ success: true, message: "task updated successfully" });
+  } catch (error) {
+    resp.status(500).json({ success: false, message: error.message });
+  }
+};
+
+////////------------------------------------------------------/////////
+
+export const getMyProfile = async (req, resp) => {
+  try {
+    const user = await User.findById(req.user._id);
+    sendToken(resp, user, 200, "Welcom back");
+  } catch (error) {
+    resp.status(500).json({ success: false, message: error.message });
+  }
+};
+
+////////------------------------------------------------------/////////
+
+export const updateProfile = async (req, resp) => {
+  try {
+    const user = await User.findById(req.user._id);
+    const { name } = req.body;
+    // const {avatar} = req.body
+    if (name) {
+      user.name = name;
+    }
+    await user.save(); // Save must required
+    resp
+      .status(200)
+      .json({ success: true, message: "Profile updated successfully" });
+  } catch (error) {
+    resp.status(500).json({ success: false, message: error.message });
+  }
+};
+
+////////------------------------------------------------------/////////
+
+export const updatePassword = async (req, resp) => {
+  try {
+    const user = await User.findById(req.user._id).select("+password")
+    const { oldPassword, newPassword } = req.body;
+    if (!oldPassword || !newPassword) {
+      resp
+        .status(400)
+        .json({
+          success: false,
+          message: "oldPassword or new password not available",
+        });
+    } else {
+      const isMatch = await user.comparePassword(oldPassword);
+
+      if (!isMatch) {
+        resp
+          .status(400)
+          .json({ success: false, message: "Invalid old password" });
+      } else {
+        user.password = newPassword;
+        await user.save()
+        resp
+          .status(200)
+          .json({ success: true, message: "Password updated successfully" });
+      }
+    }
   } catch (error) {
     resp.status(500).json({ success: false, message: error.message });
   }

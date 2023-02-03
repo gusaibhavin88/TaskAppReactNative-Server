@@ -54,7 +54,7 @@ next()
 
 userSchema.methods.getJWTtoken = function () {
   return jwt.sign({ _id: this._id }, process.env.JWT_SECRET,
-   {expiresIn: process.env.JWT_COOKIE_EXPIRE *24* 60 * 60 * 1000});   //this for registeration
+   {expiresIn: process.env.JWT_COOKIE_EXPIRE * 60 * 60 * 1000});   //this for registeration
 };
 
 userSchema.methods.comparePassword = async function (password) {     //this is for login functionality

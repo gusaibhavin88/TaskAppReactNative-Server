@@ -1,9 +1,9 @@
 export const sendToken = (resp, user, statuscode, message) => {
   const token = user.getJWTtoken();
 
-  const option = {
+  const options = {
     httpOnly: true,
-    expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRE *24* 60* 60 * 1000),
+    expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRE * 60* 60 * 1000),
   };
 
   const userData = {
@@ -17,6 +17,6 @@ export const sendToken = (resp, user, statuscode, message) => {
 
   resp
     .status(statuscode)
-    .cookie("token", token, option)
-    .json({ success: true, message, user: userData, option });
+    .cookie("token", token, options)
+    .json({ success: true, message, user: userData });
 };
