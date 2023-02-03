@@ -35,15 +35,14 @@ export const verify = async (req, resp) => {
       resp
         .status(400)
         .json({ success: false, message: "Invald OTP or has been expire" });
-    }else{
+    } else {
       user.verified = true;
-      user.otp = null
+      user.otp = null;
       user.otp_expiry = null;
-  
+
       await user.save();
       sendToken(resp, user, 200, "Account verified");
     }
-
   } catch (error) {
     resp.status(500).json({ success: false, message: error.message });
   }
@@ -57,29 +56,88 @@ export const Login = async (req, resp) => {
       resp
         .status(400)
         .json({ success: false, message: "Invalid email or password" });
-    }
-    const ismatch = await user.comparePassword(password);
-    if(!ismatch) {
+    } else {
+      const ismatch = await user.comparePassword(password);
+      if (!ismatch) {
         resp
-        .status(400)
-        .json({ success: false, message: "Invalid email or password" });
+          .status(400)
+          .json({ success: false, message: "Invalid email or password" });
+      }else{
+        sendToken(resp, user, 200, "Login successfull");
+      }
     }
-    sendToken(resp, user, 200, "Login successfull");
-
   } catch (error) {
     resp.status(500).json({ success: false, message: error.message });
   }
 };
 
-
 export const Logout = async (req, resp) => {
   const { email, password } = req.body;
   try {
-      resp
-        .status(200)
-        .cookie("token" , null , {expires : new Date(Date.now())})
-        .json({ success: true, message: "Logged out successfully" });
+    resp
+      .status(200)
+      .cookie("token", null, { expires: new Date(Date.now()) })
+      .json({ success: true, message: "Logged out successfully" });
+  } catch (error) {
+    resp.status(500).json({ success: false, message: error.message });
+  }
+};
 
+export const addtask = async (req, resp) => {
+  try {
+    const { title, description } = req.body;
+
+    const user = await User.findById(req.user._id);
+
+    user.task.push({
+      title,
+      description,
+      completed: false,
+      createdAt: new Date(Date.now()),
+    });
+
+    await user.save();
+    resp
+      .status(200)
+      .json({ success: true, message: "task added successfully" });
+  } catch (error) {
+    resp.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const removetask = async (req, resp) => {
+  try {
+    const { taskId } = req.params;
+
+    const user = await User.findById(req.user._id);
+
+    user.task = user.task.filter(
+      (task) => task._id.toString() !== taskId.toString()
+    );
+    await user.save();
+    resp
+      .status(200)
+      .json({ success: true, message: "task deleted successfully" });
+  } catch (error) {
+    resp.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const updatetask = async (req, resp) => {
+  try {
+    const { taskId } = req.params;
+
+    const user = await User.findById(req.user._id);
+
+    user.tak = user.task.find(
+      (task) => task._id.toString() === taskId.toString()
+    );
+    user.tak.completed = !user.tak.completed;
+
+    await user.save();
+    resp
+      .status(200)
+      .json({ success: true, message: "task updated successfully" });
   } catch (error) {
     resp.status(500).json({ success: false, message: error.message });
   }

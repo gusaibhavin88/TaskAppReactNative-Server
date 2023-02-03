@@ -27,12 +27,12 @@ const userSchema = new mongoose.Schema(
       type: Date,
       default: Date.now,
     },
-    task: {
+    task: [{
       title: String,
       description: String,
       completed: Boolean,
       createdAt: Date,
-    },
+    }],
     verified: {
       type: Boolean,
       default: false,
@@ -60,5 +60,7 @@ userSchema.methods.getJWTtoken = function () {
 userSchema.methods.comparePassword = async function (password) {     //this is for login functionality
     return await bcrypt.compare(password , this.password)
 }
+
+userSchema.index({otp_expiry : 1  } , { expireAfterSeconds : 0})   // expire after means it will  be deleted after given time in expire
 
 export const User = mongoose.model("User", userSchema);

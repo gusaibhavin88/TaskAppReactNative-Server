@@ -9,7 +9,7 @@ export const sendToken = (resp, user, statuscode, message) => {
   const userData = {
     _id: user._id,
     name: user.name,
-    email: user.email,
+    email: user.email,    // this fo ronly showing to terminal
     avatar: user.avatar,
     tasks: user.tasks,
     verified : user.verified
