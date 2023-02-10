@@ -12,11 +12,11 @@ export const register = async (req, resp) => {
     if (user) {
       resp.status(400).json({ success: false, message: "user already axist" });
     } else {
+
       const otp = Math.floor(Math.random() * 1000000);
       const mycloud = await cloudinary.v2.uploader.upload(avatar, {
         folder: "TodpApp-ReactNative",
       });
-
       fs.rmSync("./tmp", { recursive: true });
 
       user = await User.create({
